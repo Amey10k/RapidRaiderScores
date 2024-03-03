@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import {registerTournament} from '../Services/user-service';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import backgroundImage from '../Assests/registerTournamentImage.jpg'
 
@@ -18,6 +14,7 @@ const Register_Tournament = () =>
     tournamentDescription: '',
     startDate: '',
     endDate: '',
+    phnNumber: '' ,
     locationVenue: '',
     tournamentFormat: '',
     entryFees: ''
@@ -26,7 +23,15 @@ const Register_Tournament = () =>
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    if (e.target.name === 'phnNumber' && !e.target.value.startsWith('+91')) 
+    {
+      setFormData({ ...formData, [e.target.name]: '+91' + e.target.value });
+    } 
+    else 
+    {
+      setFormData({ ...formData, [e.target.name]: e.target.value }); 
+    }
     // Remove Error Messages
     if (errors[e.target.name]) {
       setErrors({ ...errors, [e.target.name]: '' });
@@ -151,6 +156,24 @@ const Register_Tournament = () =>
     setErrors({ ...errors, ...validationErrors });
   };
 
+  const handleBlurPhnNumber = (e) => {
+
+    const { name, value } = e.target;
+    // Perform validation on the field when it loses focus
+    const validationErrors = {};
+
+    if (name === 'phnNumber') {
+      if (value.trim() === "") {
+          validationErrors.phnNumber = 'Phone number cannot be empty.';
+      } else if (!/^\+91\d{10}$/.test(value)) {
+        validationErrors.phnNumber = 'Phone number must start with +91 and be followed by exactly 10 digits.';
+      }
+    }
+  
+
+    setErrors({ ...errors, ...validationErrors });
+  
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -202,6 +225,12 @@ const Register_Tournament = () =>
       validationErrors.endDate = 'End date must be after the current date';
     }
 
+    const phnNumberWithoutPrefix = formData.phnNumber.trim().replace(/^\+91/, '');
+    if (phnNumberWithoutPrefix.length === 0) {
+      validationErrors.phnNumber = 'Phone number is required';
+  } else if (phnNumberWithoutPrefix.length !== 10) {
+      validationErrors.phnNumber = 'Phone number must be exactly 10 digits';
+  }  
     
   
     // Validate location/venue
@@ -237,6 +266,7 @@ const Register_Tournament = () =>
             tournamentDescription: '',
             startDate: '',
             endDate: '',
+            phnNumber: '',
             locationVenue: '',
             tournamentFormat: '',
             entryFees: ''
@@ -251,6 +281,7 @@ const Register_Tournament = () =>
                 tournamentDescription: '',
                 startDate: '',
                 endDate: '',
+                phnNumber: '',
                 locationVenue: '',
                 tournamentFormat: '',
                 entryFees: ''
@@ -358,6 +389,23 @@ const Register_Tournament = () =>
                 <Form.Control.Feedback type="invalid" style={{color:'red', fontWeight:'bolder', backgroundColor:'lightblue', width:'60%', textAlign:'center'}}>
                   {errors.endDate}
                 </Form.Control.Feedback>
+              </Form.Group>
+              <br />
+              <Form.Group controlId="phnNumber">
+                  <Form.Label style={{color:'white', backgroundColor:'black', opacity:'75%'}}>Phone Number</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    placeholder="Enter phone number"
+                    name="phnNumber"
+                    value={formData.phnNumber}
+                    onChange={handleChange}
+                    onBlur={handleBlurPhnNumber}
+                    isInvalid={!!errors.phnNumber}
+                    style={{opacity:'85%'}}
+                  />
+                  <Form.Control.Feedback type="invalid" style={{color:'red', fontWeight:'bolder', backgroundColor:'lightblue', width:'60%', textAlign:'center'}}>
+                    {errors.phnNumber}
+                  </Form.Control.Feedback>
               </Form.Group>
               <br />
               <Form.Group controlId="locationVenue">
